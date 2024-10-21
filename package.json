@@ -1,0 +1,32 @@
+{
+  "name": "physical-store",
+  "version": "1.0.0",
+  "description": "Project to apply the concepts learned on Compass.UOL internship.",
+  "main": "app.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carlosemmanueldev/Desafio-2-Physical-Store.git"
+  },
+  "author": "Carlos Emmanuel",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/carlosemmanueldev/Desafio-2-Physical-Store/issues"
+  },
+  "homepage": "https://github.com/carlosemmanueldev/Desafio-2-Physical-Store#readme",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "mongoose": "^8.7.2",
+    "winston": "^3.15.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "ts-node": "^10.9.2",
+    "@types/express": "^5.0.0",
+    "@types/mongoose": "^5.11.96"
+  }
+}
