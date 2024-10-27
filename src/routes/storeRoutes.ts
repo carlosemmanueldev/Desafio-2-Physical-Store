@@ -1,7 +1,18 @@
 import express from "express";
-import {createStore, deleteStore, getStore, getStores, updateStore} from "../controllers/storeController";
+import {
+    createStore,
+    deleteStore,
+    getStore,
+    getStores,
+    getStoresNearBy,
+    updateStore
+} from "../controllers/storeController";
 
 const storeRouter = express.Router();
+
+storeRouter
+    .route("/stores-near-by/:cep")
+    .get(getStoresNearBy);
 
 storeRouter
     .route("/")
