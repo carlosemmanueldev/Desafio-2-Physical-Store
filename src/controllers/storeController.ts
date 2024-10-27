@@ -1,5 +1,6 @@
 import Store from './../models/storeModel';
 import { Request, Response } from 'express';
+import {getAddressByCep} from "../services/viacepService";
 
 export const getStores = async (req: Request, res: Response) => {
     try {
@@ -79,6 +80,25 @@ export const deleteStore = async (req: Request, res: Response) => {
         res.status(204).json({
             status: 'success',
             data: null
+        });
+    } catch (error) {
+        res.status(404).json({
+            status: 'fail',
+            message: error
+        });
+    }
+}
+
+export const getStoresNearBy = async (req: Request, res: Response) => {
+    try {
+        const { cep } = req.params;
+        const addressData = await getAddressByCep(cep);
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                addressData
+            }
         });
     } catch (error) {
         res.status(404).json({
