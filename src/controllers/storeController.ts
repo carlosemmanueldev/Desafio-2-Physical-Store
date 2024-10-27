@@ -1,6 +1,6 @@
 import Store from './../models/storeModel';
-import { Request, Response } from 'express';
-import {getAddressByCep} from "../services/viacepService";
+import {Request, Response} from 'express';
+import {calculateCoordinates} from "../utils/location";
 
 export const getStores = async (req: Request, res: Response) => {
     try {
@@ -91,13 +91,26 @@ export const deleteStore = async (req: Request, res: Response) => {
 
 export const getStoresNearBy = async (req: Request, res: Response) => {
     try {
-        const { cep } = req.params;
-        const addressData = await getAddressByCep(cep);
+        const {cep} = req.params;
+
+        const coordinates = await calculateCoordinates(cep);
+
+        const stores = await Store.find({
+            location: {
+                $nearSphere: {
+                    $geometry: {
+                        type: 'Point',
+                        coordinates: coordinates,
+                    },
+                    $maxDistance: 100000
+                }
+            }
+        });
 
         res.status(200).json({
             status: 'success',
             data: {
-                addressData
+                stores
             }
         });
     } catch (error) {
