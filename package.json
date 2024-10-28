@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/carlosemmanueldev/Desafio-2-Physical-Store#readme",
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.0",
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
@@ -27,9 +28,9 @@
     "winston": "^3.15.0"
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
-    "ts-node": "^10.9.2",
     "@types/express": "^5.0.0",
-    "@types/mongoose": "^5.11.96"
+    "@types/mongoose": "^5.11.96",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
   }
 }
