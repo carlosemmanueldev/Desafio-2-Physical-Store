@@ -3,8 +3,8 @@ import {calculateCoordinates} from "../utils/location";
 
 const storeSchema = new Schema(
     {
-        name: {type: String, required: true},
-        cep: {type: String, required: true},
+        name: {type: String, required: [true, 'A store must have a name.'], unique: true},
+        cep: {type: String, required: [true, 'A store must have a cep.']},
         street: {type: String, required: true},
         complement: {type: String},
         neighborhood: {type: String, required: true},
@@ -14,7 +14,7 @@ const storeSchema = new Schema(
         region: {type: String, required: true},
         location: {
             type: {type: String, default: 'Point', enum: ['Point']},
-            coordinates: [Number]
+            coordinates: {type: [Number], immutable: true},
         },
     },
     {
