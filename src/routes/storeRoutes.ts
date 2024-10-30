@@ -11,7 +11,7 @@ import {
 const storeRouter = express.Router();
 
 storeRouter
-    .route("/stores-near-by/:cep")
+    .route("/near-by/:cep")
     .get(getStoresNearBy);
 
 storeRouter
