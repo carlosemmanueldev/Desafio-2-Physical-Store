@@ -1,122 +1,107 @@
 import Store from './../models/storeModel';
-import {Request, Response} from 'express';
+import catchAsync from './../utils/catchAsync';
+import {NextFunction, Request, Response} from 'express';
 import {calculateCoordinates} from "../utils/location";
+import AppError from "../utils/appError";
 
-export const getStores = async (req: Request, res: Response) => {
-    try {
-        const stores = await Store.find();
+export const getStores = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const stores = await Store.find();
+
+    res.status(200).json({
+        status: 'success',
+        results: stores.length,
+        data: {
+            stores
+        }
+    });
+});
+
+export const createStore = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const store = await Store.create(req.body);
+
+    res.status(201).json({
+        status: 'success',
+        data: {
+            store
+        }
+    });
+});
+
+export const getStore = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const store = await Store.findById(req.params.id);
+
+    if (!store) {
+        return next(new AppError('Store not found with that ID.', 404));
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            store
+        }
+    });
+
+});
+
+export const updateStore = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const store = await Store.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true
+    });
+
+    if (!store) {
+        return next(new AppError('Store not found with that ID.', 404));
+    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            store
+        }
+    });
+});
+
+export const deleteStore = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const store = await Store.findByIdAndDelete(req.params.id);
+
+    if (!store) {
+        return next(new AppError('Store not found with that ID.', 404));
+    }
+
+    res.status(204).json({
+        status: 'success',
+        data: null
+    });
+});
+
+export const getStoresNearBy = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const {cep} = req.params;
+
+    const coordinates = await calculateCoordinates(cep);
+
+    const stores = await Store.find({
+        location: {
+            $nearSphere: {
+                $geometry: {
+                    type: 'Point',
+                    coordinates: coordinates,
+                },
+                $maxDistance: 100000
+            }
+        }
+    });
+
+    if (stores.length === 0) {
         res.status(200).json({
             status: 'success',
-            results: stores.length,
-            data: {
-                stores
-            }
-        });
-    } catch (error) {
-        res.status(400).json({
-            status: 'fail',
-            message: error
+            message: 'No stores found near this location.'
         });
     }
-}
 
-export const createStore = async (req: Request, res: Response) => {
-    try {
-        const store = await Store.create(req.body);
-        res.status(201).json({
-            status: 'success',
-            data: {
-                store
-            }
-        });
-    } catch (error) {
-        res.status(400).json({
-            status: 'fail',
-            message: error
-        });
-    }
-};
-
-export const getStore = async (req: Request, res: Response) => {
-    try {
-        const store = await Store.findById(req.params.id);
-        res.status(200).json({
-            status: 'success',
-            data: {
-                store
-            }
-        });
-    } catch (error) {
-        res.status(404).json({
-            status: 'fail',
-            message: error
-        });
-    }
-}
-
-export const updateStore = async (req: Request, res: Response) => {
-    try {
-        const store = await Store.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        });
-        res.status(200).json({
-            status: 'success',
-            data: {
-                store
-            }
-        });
-    } catch (error) {
-        res.status(404).json({
-            status: 'fail',
-            message: error
-        });
-    }
-}
-
-export const deleteStore = async (req: Request, res: Response) => {
-    try {
-        await Store.findByIdAndDelete(req.params.id);
-        res.status(204).json({
-            status: 'success',
-            data: null
-        });
-    } catch (error) {
-        res.status(404).json({
-            status: 'fail',
-            message: error
-        });
-    }
-}
-
-export const getStoresNearBy = async (req: Request, res: Response) => {
-    try {
-        const {cep} = req.params;
-
-        const coordinates = await calculateCoordinates(cep);
-
-        const stores = await Store.find({
-            location: {
-                $nearSphere: {
-                    $geometry: {
-                        type: 'Point',
-                        coordinates: coordinates,
-                    },
-                    $maxDistance: 100000
-                }
-            }
-        });
-
-        res.status(200).json({
-            status: 'success',
-            data: {
-                stores
-            }
-        });
-    } catch (error) {
-        res.status(404).json({
-            status: 'fail',
-            message: error
-        });
-    }
-}
+    res.status(200).json({
+        status: 'success',
+        data: {
+            stores
+        }
+    });
+});
