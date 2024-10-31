@@ -1,6 +1,7 @@
 import {NextFunction, Response, Request} from "express";
 import AppError from "../utils/appError";
 import {Error as MongooseError, mongo as MongoDB} from "mongoose";
+import logger from "../config/logger";
 
 const handleCastErrorDB = (err: MongooseError.CastError) => {
     const message = `Invalid ${err.path}: ${err.value}.`;
@@ -20,6 +21,8 @@ const handleValidationErrorDB = (err: MongooseError.ValidationError) => {
 }
 
 const sendErrorDev = (err: CustomError, res: Response) => {
+    logger.error(`Error: ${err.message}`, { stack: err.stack });
+
     if (err instanceof AppError) {
         res.status(err.statusCode).json({
             status: err.status,
@@ -38,7 +41,7 @@ const sendErrorDev = (err: CustomError, res: Response) => {
 }
 
 const sendErrorProd = (err: CustomError, res: Response) => {
-    console.error('ERROR: ', err);
+    logger.error('Error: ', err);
 
     res.status(500).json({
         status: 'error',
@@ -47,6 +50,8 @@ const sendErrorProd = (err: CustomError, res: Response) => {
 }
 
 const sendErrorProdOperational = (err: AppError, res: Response) => {
+    logger.error(`Operational Error: ${err.message}`);
+
     res.status(err.statusCode).json({
         status: err.status,
         message: err.message
