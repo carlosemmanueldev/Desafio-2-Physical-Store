@@ -9,7 +9,7 @@ export const calculateCoordinates = async (cep: string) => {
         throw new AppError('Zip code does not exist.', 404);
     }
 
-    const {logradouro, bairro, localidade, estado} = addressData;
+    const {logradouro, bairro, localidade, uf, estado, regiao} = addressData;
     const address = `${logradouro}, ${bairro}, ${localidade}, ${estado}`;
 
     const coordinates = await getCoordinates(address);
@@ -18,5 +18,13 @@ export const calculateCoordinates = async (cep: string) => {
         throw new AppError('Address not found.', 404);
     }
 
-    return [coordinates.longitude, coordinates.latitude];
+    return {
+        street: logradouro,
+        neighborhood: bairro,
+        city: localidade,
+        uf: uf,
+        state: estado,
+        region: regiao,
+        coordinates: [coordinates.longitude, coordinates.latitude]
+    }
 }
