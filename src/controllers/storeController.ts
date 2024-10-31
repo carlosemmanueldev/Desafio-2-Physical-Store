@@ -3,13 +3,18 @@ import catchAsync from './../utils/catchAsync';
 import {NextFunction, Request, Response} from 'express';
 import {calculateCoordinates} from "../utils/location";
 import AppError from "../utils/appError";
+import ApiFeatures from "../utils/apiFeatures";
 
 export const getStores = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const stores = await Store.find();
+    const features = await new ApiFeatures(Store.find(), req.query)
+        .paginate();
+    const stores = await features.query;
 
     res.status(200).json({
         status: 'success',
         results: stores.length,
+        page: features.currentPage,
+        totalPages: features.totalPages,
         data: {
             stores
         }
@@ -76,10 +81,9 @@ export const deleteStore = catchAsync(async (req: Request, res: Response, next: 
 
 export const getStoresNearBy = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const {cep} = req.params;
+    const {coordinates} = await calculateCoordinates(cep);
 
-    const coordinates = await calculateCoordinates(cep);
-
-    const stores = await Store.find({
+    const query = Store.find({
         location: {
             $nearSphere: {
                 $geometry: {
@@ -91,6 +95,11 @@ export const getStoresNearBy = catchAsync(async (req: Request, res: Response, ne
         }
     });
 
+    const features = await new ApiFeatures(query, req.query)
+        .paginate();
+
+    const stores = await features.query;
+
     if (stores.length === 0) {
         res.status(200).json({
             status: 'success',
@@ -100,6 +109,9 @@ export const getStoresNearBy = catchAsync(async (req: Request, res: Response, ne
 
     res.status(200).json({
         status: 'success',
+        results: stores.length,
+        page: features.currentPage,
+        totalPages: features.totalPages,
         data: {
             stores
         }
