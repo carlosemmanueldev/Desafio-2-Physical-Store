@@ -1,4 +1,4 @@
-
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/carlosemmanueldev/Desafio-2-Physical-Store)
 # 🏬Physical Store
 
 Projeto desenvolvido no programa de estágio da Compass.UOL, com o objetivo de aplicar conhecimentos sobre Node.js, Typescript e MongoDB.
