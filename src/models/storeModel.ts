@@ -1,7 +1,24 @@
 import {Schema, model} from 'mongoose';
 import {calculateCoordinates} from "../utils/location";
 
-const storeSchema = new Schema(
+interface Store {
+    name: string;
+    cep: string;
+    number: string;
+    street: string;
+    complement: string;
+    neighborhood: string;
+    city: string;
+    uf: string;
+    state: string;
+    region: string;
+    location: {
+        type: string;
+        coordinates: [number, number];
+    };
+}
+
+const storeSchema = new Schema<Store>(
     {
         name: {type: String, required: [true, 'A store must have a name.'], unique: true},
         cep: {type: String, required: [true, 'A store must have a cep.']},
@@ -26,6 +43,7 @@ const storeSchema = new Schema(
 storeSchema.set('toJSON', {
     transform: (doc, ret) => {
         return {
+            id: ret._id,
             name: ret.name,
             cep: ret.cep,
             number: ret.number,
@@ -43,7 +61,7 @@ storeSchema.set('toJSON', {
     }
 });
 
-
+storeSchema.index({ cep: 1, number: 1 }, { unique: true });
 storeSchema.index({location: '2dsphere'});
 
 storeSchema.pre('save', async function (next) {
@@ -57,8 +75,9 @@ storeSchema.pre('save', async function (next) {
     this.region = address.region;
     this.location = {
         type: 'Point',
-        coordinates: address.coordinates
+        coordinates: [address.coordinates[1], address.coordinates[0]]
     };
+
     next();
 });
 
@@ -69,7 +88,7 @@ storeSchema.pre('findOneAndUpdate', async function (next) {
 
     if (shouldRecalculate) {
         const doc = await this.model.findOne(this.getQuery());
-        const cep = update.cep || doc.cep;
+        const cep: string = update.cep || doc.cep;
 
         const address = await calculateCoordinates(cep);
 
@@ -86,6 +105,8 @@ storeSchema.pre('findOneAndUpdate', async function (next) {
             }
         });
     }
+
+    next();
 });
 
 const Store = model('Store', storeSchema);
