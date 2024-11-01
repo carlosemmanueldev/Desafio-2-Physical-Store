@@ -75,7 +75,7 @@ storeSchema.pre('save', async function (next) {
     this.region = address.region;
     this.location = {
         type: 'Point',
-        coordinates: [address.coordinates[1], address.coordinates[0]]
+        coordinates: [address.coordinates[0], address.coordinates[1]]
     };
 
     next();

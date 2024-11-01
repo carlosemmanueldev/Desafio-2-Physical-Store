@@ -87,21 +87,22 @@ export const getStoresNearBy = catchAsync(async (req: Request, res: Response, ne
             $geoNear: {
                 near: {
                     type: 'Point',
-                    coordinates:[coordinates[0], coordinates[1]],
+                    coordinates: [coordinates[0], coordinates[1]],
                 },
                 distanceField: 'distance',
                 maxDistance: 100000,
+                distanceMultiplier: 0.001,
                 spherical: true,
             },
         },
         {
             $addFields: {
-                distance: { $divide: ["$distance", 1000] }
-            }
-        },
-        {
-            $addFields: {
-                distance: { $concat: [{ $toString: { $round: ["$distance", 3] } }, "km"] }
+                distance: {
+                    $concat: [
+                        { $toString: { $round: ["$distance", 2] } },
+                        " km"
+                    ]
+                }
             }
         },
         {
@@ -116,11 +117,11 @@ export const getStoresNearBy = catchAsync(async (req: Request, res: Response, ne
                 uf: 1,
                 state: 1,
                 region: 1,
+                distance: 1,
                 coordinates: {
-                    lat: {$arrayElemAt: ["$location.coordinates", 1]},
-                    lon: {$arrayElemAt: ["$location.coordinates", 0]}
+                    lat: {$arrayElemAt: ['$location.coordinates', 1]},
+                    lon: {$arrayElemAt: ['$location.coordinates', 0]}
                 },
-                distance: 1
             }
         },
     ]);
