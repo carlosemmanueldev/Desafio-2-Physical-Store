@@ -32,6 +32,18 @@ if (process.env.NODE_ENV === 'production') {
         tryReconnect: true,
         format: combine(timestamp(), json()),
     }));
+
+    logger.add(new transports.File({
+        filename: 'logs/combined.log',
+        level: 'info',
+        format: combine(timestamp(), json())
+    }));
+
+    logger.add(new transports.File({
+        filename: 'logs/error.log',
+        level: 'error',
+        format: combine(timestamp(), json())
+    }));
 }
 
 export default logger;
