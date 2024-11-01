@@ -40,8 +40,16 @@ const sendErrorDev = (err: CustomError, res: Response) => {
     }
 }
 
-const sendErrorProd = (err: CustomError, res: Response) => {
-    logger.error('Error: ', err);
+const sendErrorProd = (err: CustomError, req: Request, res: Response) => {
+    logger.error(`Error: ${err}`, {
+        request: {
+            method: req.method,
+            url: req.originalUrl,
+            params: req.params,
+            query: req.query,
+            body: req.body,
+        },
+    });
 
     res.status(500).json({
         status: 'error',
@@ -49,8 +57,17 @@ const sendErrorProd = (err: CustomError, res: Response) => {
     })
 }
 
-const sendErrorProdOperational = (err: AppError, res: Response) => {
-    logger.error(`Operational Error: ${err.message}`);
+const sendErrorProdOperational = (err: AppError, req: Request, res: Response) => {
+    logger.error(`Operational Error: ${err.message}`, {
+        stack: err.stack,
+        request: {
+            method: req.method,
+            url: req.originalUrl,
+            params: req.params,
+            query: req.query,
+            body: req.body,
+        },
+    });
 
     res.status(err.statusCode).json({
         status: err.status,
@@ -83,7 +100,7 @@ export const globalErrorHandler = (err: CustomError, req: Request, res: Response
                 break;
         }
 
-        if (err instanceof AppError && err.isOperational) sendErrorProdOperational(err, res);
-        else sendErrorProd(err, res);
+        if (err instanceof AppError && err.isOperational) sendErrorProdOperational(err, req, res);
+        else sendErrorProd(err, req, res);
     }
 }
