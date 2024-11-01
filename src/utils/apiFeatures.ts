@@ -18,7 +18,7 @@ class ApiFeatures {
 
     async paginate() {
         this.currentPage = +this.queryString.page || 1;
-        const limit = +this.queryString.limit || 1;
+        const limit = +this.queryString.limit || 5;
         const skip = (this.currentPage - 1) * limit;
 
         if (this.query instanceof Query) {
