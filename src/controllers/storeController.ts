@@ -45,7 +45,6 @@ export const getStore = catchAsync(async (req: Request, res: Response, next: Nex
             store
         }
     });
-
 });
 
 export const updateStore = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -83,17 +82,48 @@ export const getStoresNearBy = catchAsync(async (req: Request, res: Response, ne
     const {cep} = req.params;
     const {coordinates} = await calculateCoordinates(cep);
 
-    const query = Store.find({
-        location: {
-            $nearSphere: {
-                $geometry: {
+    const query = Store.aggregate([
+        {
+            $geoNear: {
+                near: {
                     type: 'Point',
-                    coordinates: coordinates,
+                    coordinates:[coordinates[0], coordinates[1]],
                 },
-                $maxDistance: 100000
+                distanceField: 'distance',
+                maxDistance: 100000,
+                spherical: true,
+            },
+        },
+        {
+            $addFields: {
+                distance: { $divide: ["$distance", 1000] }
             }
-        }
-    });
+        },
+        {
+            $addFields: {
+                distance: { $concat: [{ $toString: { $round: ["$distance", 3] } }, "km"] }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                name: 1,
+                cep: 1,
+                number: 1,
+                street: 1,
+                neighborhood: 1,
+                city: 1,
+                uf: 1,
+                state: 1,
+                region: 1,
+                coordinates: {
+                    lat: {$arrayElemAt: ["$location.coordinates", 1]},
+                    lon: {$arrayElemAt: ["$location.coordinates", 0]}
+                },
+                distance: 1
+            }
+        },
+    ]);
 
     const features = await new ApiFeatures(query, req.query)
         .paginate();
